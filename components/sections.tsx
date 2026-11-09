@@ -165,7 +165,7 @@ export function Hero() {
           </Item>
           <Item>
             <a href="#contact" className="btn btn-primary">
-              Discuss a Project
+              Software Consultation
             </a>
           </Item>
         </Stagger>
@@ -410,7 +410,7 @@ export function Contact() {
           </Item>
           <Item>
             <a className="btn btn-primary" href={`mailto:${D.site.email}`}>
-              Discuss a Project
+              Software Consultation
             </a>
           </Item>
         </Stagger>
