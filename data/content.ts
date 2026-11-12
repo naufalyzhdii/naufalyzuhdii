@@ -32,23 +32,64 @@ export const hero = {
   eyebrow: "Solutions Engineer / Technical Consultant",
   heading: "Turning Complex Business Needs into Systems That Work.",
   description:
-    "Solutions Engineer & Technical Consultant helping businesses design, build, and automate practical software and AI systems.",
+    "Helping businesses turn ideas, challenges, and opportunities into practical digital solutions",
 };
+export type CapabilityMedia =
+  | { type: "image"; src: string; alt: string }
+  | { type: "video"; src: string; poster?: string };
+
+export type Capability = { title: string; media: CapabilityMedia };
+
 export const profile = {
-  heading: "Bridging messy business needs and systems that actually work.",
-  intro:
-    "I'm a Solutions Engineer, Technical Consultant and Founder at Neightive. I build custom software and AI tools for businesses that still rely on manual processes, from early discovery to production.",
-  approach:
-    "I turn business problems into system designs through feasibility checks, requirements gathering and a quick proof of concept before the full build. I integrate LLMs such as ChatGPT, Claude and Gemini into real workflows, including automated pipelines and data processing.",
-  perspective:
-    "The goal is to solve operational problems, reduce manual work and deliver results that can be evaluated. I build with PHP/Laravel, Next.js, React.js, Node.js, NestJS, TypeScript, PostgreSQL, Redis and BullMQ.",
+  heading: "Work",
+  // intro:
+  //   "Helping businesses turn ideas, challenges, and opportunities into practical digital solutions",
+  // approach:
+  //   "I turn business problems into system designs through feasibility checks, requirements gathering and a quick proof of concept before the full build. I integrate LLMs such as ChatGPT, Claude and Gemini into real workflows, including automated pipelines and data processing.",
+  // perspective:
+  //   "The goal is to solve operational problems, reduce manual work and deliver results that can be evaluated. I build with PHP/Laravel, Next.js, React.js, Node.js, NestJS, TypeScript, PostgreSQL, Redis and BullMQ.",
   capabilities: [
-    "Solution architecture & consulting",
-    "Custom software development",
-    "AI integration & automation",
-    "Data processing pipelines",
-    "Requirements & feasibility",
-  ],
+    {
+      title: "Website Design & Development",
+      media: {
+        type: "image",
+        src: "/projects/dolf.png",
+        alt: "Website design & development",
+      },
+    },
+    {
+      title: "Solution Architecture & Technical Consulting",
+      media: {
+        type: "image",
+        src: "/projects/kbri.png",
+        alt: "Solution architecture & technical consulting",
+      },
+    },
+    {
+      title: "Custom Software Development",
+      media: {
+        type: "image",
+        src: "/projects/atm.png",
+        alt: "Custom software development",
+      },
+    },
+    {
+      title: "AI Integration & Workflow Automation",
+      media: {
+        type: "image",
+        src: "/projects/eightlab.png",
+        alt: "AI integration & workflow automation",
+      },
+    },
+    {
+      title: "Data Engineering & Analytics",
+      media: {
+        type: "image",
+        src: "/projects/realsight.png",
+        alt: "Data engineering & analytics",
+      },
+    },
+  ] as Capability[],
 };
 export type Project = {
   title: string;

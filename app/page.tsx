@@ -3,9 +3,9 @@ import {
   SiteHeader,
   Hero,
   Profile,
-  SelectedWork,
+  // SelectedWork,
   Cinematic,
-  Services,
+  // Services,
   Recognition,
   ClientStrip,
   Contact,
@@ -22,9 +22,9 @@ export default function Page() {
         <Hero />
         <Profile />
         <ClientStrip />
-        <SelectedWork />
+        {/* <SelectedWork /> */}
         <Cinematic />
-        <Services />
+        {/* <Services /> */}
         <Recognition />
         <Contact />
       </main>

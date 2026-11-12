@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
@@ -181,72 +181,209 @@ export function Hero() {
   );
 }
 
+// true = desktop dengan mouse (preview melayang), false = layar sentuh/kecil (media inline)
+function useFloatingPreview() {
+  const [v, setV] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 900px) and (hover: hover)");
+    const on = () => setV(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return v;
+}
+function CapabilityMediaView({
+  m,
+  active,
+}: {
+  m: D.CapabilityMedia;
+  active: boolean;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  // video hanya diputar saat item-nya aktif
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (active) v.play().catch(() => {});
+    else v.pause();
+  }, [active]);
+
+  if (m.type === "video") {
+    return (
+      <video
+        ref={ref}
+        src={m.src}
+        poster={m.poster}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+    );
+  }
+  return (
+    <Image
+      src={m.src}
+      alt={m.alt}
+      fill
+      unoptimized
+      sizes="420px"
+      style={{ objectFit: "cover" }}
+    />
+  );
+}
+
 export function Profile() {
   const p = D.profile;
+  const floating = useFloatingPreview();
+  const [hover, setHover] = useState<number | null>(null);
+  const [y, setY] = useState(0);
+  const listRef = useRef<HTMLUListElement>(null);
+  const active = hover ?? 0;
+
+  const enter = (i: number, el: HTMLElement) => {
+    const list = listRef.current;
+    if (!list) return;
+    const r = el.getBoundingClientRect();
+    const l = list.getBoundingClientRect();
+    setY(r.top - l.top + r.height / 2);
+    setHover(i);
+  };
+
   return (
     <Section id="about" label="About">
       <Reveal>
         <h2 className="display-lg">{p.heading}</h2>
       </Reveal>
+      {/* 
       <div className="grid profile-grid">
         <Stagger className="c-7">
           <Item>
             <p className="body-lg measure">{p.intro}</p>
           </Item>
-          <ul className="caps">
+        </Stagger>
+      </div> */}
+
+      <Reveal>
+        <div
+          className="caps-x-wrap"
+          onMouseLeave={() => floating && setHover(null)}
+        >
+          <ul className="caps-x" ref={listRef}>
             {p.capabilities.map((c, i) => (
-              <Item key={c}>
-                <li className={i === 0 ? "on" : ""}>{c}</li>
-              </Item>
+              <li
+                key={c.title}
+                tabIndex={0}
+                className={i === active ? "on" : ""}
+                onMouseEnter={(e) => floating && enter(i, e.currentTarget)}
+                onFocus={(e) => floating && enter(i, e.currentTarget)}
+                onBlur={() => floating && setHover(null)}
+                onClick={() => !floating && setHover(i)}
+              >
+                <span className="caps-title">{c.title}</span>
+
+                {/* mobile / layar sentuh: media inline di bawah judul */}
+                {!floating && (
+                  <AnimatePresence initial={false}>
+                    {i === active && (
+                      <motion.div
+                        key="inline"
+                        className="caps-inline-clip"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.4, ease }}
+                      >
+                        <div className="caps-inline">
+                          <CapabilityMediaView m={c.media} active />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
+              </li>
             ))}
           </ul>
-        </Stagger>
-      </div>
+
+          {/* desktop: preview melayang di kanan */}
+          {floating && (
+            <motion.div
+              className="caps-preview"
+              aria-hidden
+              initial={false}
+              animate={{
+                y,
+                opacity: hover === null ? 0 : 1,
+                scale: hover === null ? 0.96 : 1,
+              }}
+              transition={{
+                y: { type: "spring", stiffness: 260, damping: 30 },
+                opacity: { duration: 0.25 },
+                scale: { duration: 0.3, ease },
+              }}
+            >
+              {p.capabilities.map((c, i) => (
+                <motion.div
+                  key={c.title}
+                  className="caps-preview-item"
+                  initial={false}
+                  animate={{ opacity: hover === i ? 1 : 0 }}
+                  transition={{ duration: 0.3, ease }}
+                >
+                  <CapabilityMediaView m={c.media} active={hover === i} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </Reveal>
     </Section>
   );
 }
 
-function ProjectCard({ p, priority }: { p: D.Project; priority?: boolean }) {
-  return (
-    <Stagger className={`card c-${p.span}`}>
-      <a
-        href={p.href}
-        className="card-link"
-        aria-label={`Discuss this project: ${p.title}`}
-      >
-        <Media
-          src={p.image}
-          alt={p.imageAlt}
-          ratio={p.ratio}
-          priority={priority}
-          className="hover-zoom"
-        />
-      </a>
-      <Item className="meta">
-        <div className="meta-row">
-          <h3 className="h3">{p.title}</h3>
-          <span className="mono">{p.year}</span>
-        </div>
-        <p className="mono">{p.category}</p>
-        <p className="soft measure">{p.summary}</p>
-      </Item>
-    </Stagger>
-  );
-}
-export function SelectedWork() {
-  return (
-    <Section id="work" label="Selected work">
-      <Reveal className="heading-row">
-        <h2 className="h1">Selected Work</h2>
-      </Reveal>
-      <div className="grid work-grid">
-        {D.projects.map((p, i) => (
-          <ProjectCard key={p.title} p={p} priority={i === 0} />
-        ))}
-      </div>
-    </Section>
-  );
-}
+// function ProjectCard({ p, priority }: { p: D.Project; priority?: boolean }) {
+//   return (
+//     <Stagger className={`card c-${p.span}`}>
+//       <a
+//         href={p.href}
+//         className="card-link"
+//         aria-label={`Discuss this project: ${p.title}`}
+//       >
+//         <Media
+//           src={p.image}
+//           alt={p.imageAlt}
+//           ratio={p.ratio}
+//           priority={priority}
+//           className="hover-zoom"
+//         />
+//       </a>
+//       <Item className="meta">
+//         <div className="meta-row">
+//           <h3 className="h3">{p.title}</h3>
+//           <span className="mono">{p.year}</span>
+//         </div>
+//         <p className="mono">{p.category}</p>
+//         <p className="soft measure">{p.summary}</p>
+//       </Item>
+//     </Stagger>
+//   );
+// }
+// export function SelectedWork() {
+//   return (
+//     <Section id="work" label="Selected work">
+//       <Reveal className="heading-row">
+//         <h2 className="h1">Selected Work</h2>
+//       </Reveal>
+//       <div className="grid work-grid">
+//         {D.projects.map((p, i) => (
+//           <ProjectCard key={p.title} p={p} priority={i === 0} />
+//         ))}
+//       </div>
+//     </Section>
+//   );
+// }
 
 export function Cinematic() {
   const c = D.cinema;
